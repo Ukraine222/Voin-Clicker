@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voin Clicker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Стили для шевронов */
+        .chevron.mythic .chevron-preview {
+            border: 4px solid #ff0000 !important;
+            box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000 !important;
+            animation: mythicGlow 2s infinite !important;
+        }
+        .chevron.legendary .chevron-preview {
+            border: 4px solid #ffd700 !important;
+            box-shadow: 0 0 10px #ffd700 !important;
+        }
+        .chevron.legendary .chevron-preview:hover {
+            border: 4px solid #ff4500 !important;
+            box-shadow: 0 0 15px #ff4500 !important;
+        }
+        .chevron.ultra .chevron-preview {
+            border: 4px solid #ff8c00 !important;
+            box-shadow: 0 0 10px #ff8c00 !important;
+        }
+        .chevron.ultra .chevron-preview:hover {
+            border: 4px solid #ff4500 !important;
+            box-shadow: 0 0 15px #ff4500 !important;
+        }
+        .chevron.epic .chevron-preview {
+            border: 4px solid #800080 !important;
+            box-shadow: 0 0 10px #800080 !important;
+        }
+        .chevron.epic .chevron-preview:hover {
+            border: 4px solid #ff4500 !important;
+            box-shadow: 0 0 15px #ff4500 !important;
+        }
+        .chevron.rare .chevron-preview {
+            border: 4px solid #008000 !important;
+            box-shadow: 0 0 10px #008000 !important;
+        }
+        .chevron.rare .chevron-preview:hover {
+            border: 4px solid #ff4500 !important;
+            box-shadow: 0 0 15px #ff4500 !important;
+        }
+        .chevron-class {
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            margin: 5px 0;
+            text-align: center;
+            display: block;
+        }
+        .chevron.mythic .chevron-class { color: #ff0000; }
+        .chevron.legendary .chevron-class { color: #ffd700; }
+        .chevron.ultra .chevron-class { color: #ff8c00; }
+        .chevron.epic .chevron-class { color: #800080; }
+        .chevron.rare .chevron-class { color: #008000; }
+
+        /* Стили для валют */
+        .currency-value {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        .currency-value.uah {
+            color: #FFD700;
+            text-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
+        }
+        .currency-value.usd {
+            color: #00FF00;
+            text-shadow: 0 0 5px #00FF00, 0 0 10px #00FF00;
+        }
+        .currency-value.eur {
+            color: #1E90FF;
+            text-shadow: 0 0 5px #1E90FF, 0 0 10px #1E90FF;
+        }
+        .currency-value.btc {
+            color: #FFA500;
+            text-shadow: 0 0 5px #FFA500, 0 0 10px #FFA500;
+        }
+
+        /* Стили для кнопок */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 14px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 5px #4CAF50, 0 0 10px #4CAF50;
+        }
+        button:hover {
+            background-color: #45a049;
+            box-shadow: 0 0 10px #45a049, 0 0 15px #45a049;
+        }
+        button:disabled {
+            background-color: #666666;
+            color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .bet-button, .convert-button, .redeem-button {
+            background-color: #FF4500;
+            box-shadow: 0 0 5px #FF4500, 0 0 10px #FF4500;
+        }
+        .bet-button:hover, .convert-button:hover, .redeem-button:hover {
+            background-color: #e03e00;
+            box-shadow: 0 0 10px #e03e00, 0 0 15px #e03e00;
+        }
+
+        /* Анимация для mythic */
+        @keyframes mythicGlow {
+            0% { box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; }
+            50% { box-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; }
+            100% { box-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000; }
+        }
+
+        /* Стили для уведомлений */
+        #notification-container {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 80%;
+            max-width: 400px;
+        }
+        .notification {
+            background: linear-gradient(45deg, #3d5a2b, #4a7043);
+            color: #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #2e3b2a;
+            border-radius: 5px;
+            font-family: 'Comfortaa', sans-serif;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.5s ease-out, fadeOut 3s 2s forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        /* Стили для казино */
+        .casino-container {
+            background: #2e3b2a;
+            border: 3px solid #4a7043;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            color: #ffffff;
+        }
+        .casino-container h2 {
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            color: #d4d4d4;
+        }
+        .casino-modes {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .mode-button {
+            background-color: #4a7043;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .mode-button.active {
+            background-color: #5a8c4f;
+            box-shadow: 0 0 10px #5a8c4f;
+        }
+        .casino-container input {
+            background: #3d5a2b;
+            color: #ffffff;
+            border: 1px solid #4a7043;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 200px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .casino-image img {
+            border: 2px solid #4a7043;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        /* Стили для конвертера */
+        .converter-container input[type="number"] {
+            background: #3d5a2b;
+            color: #ffffff;
+            border: 1px solid #4a7043;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 200px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        /* Стили для таймеров бонусов */
+        .bonus-timer {
+            color: #ffffff;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 14px;
+            margin-left: 10px;
+            display: inline-block;
+            background: #3d5a2b;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: 2px solid #4a7043;
+            box-shadow: 0 0 5px #4a7043;
+        }
+
+        /* Стили для под-вкладок инвентаря */
+        .inventory-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #2e3b2a;
+            border-bottom: 2px solid #4a7043;
+        }
+        .inventory-tab-button {
+            background: #4a7043;
+            color: #ffffff;
+            border: 2px solid #3d5a2b;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 5px #4a7043;
+        }
+        .inventory-tab-button:hover {
+            background: #5a8c4f;
+            box-shadow: 0 0 10px #5a8c4f;
+        }
+        .inventory-tab-button.active {
+            background: #5a8c4f;
+            box-shadow: 0 0 10px #5a8c4f, 0 0 15px #5a8c4f;
+        }
+        .inventory-subtab {
+            display: none;
+        }
+        .inventory-subtab.active {
+            display: block;
+        }
+        .inventory-placeholder {
+            color: #d4d4d4;
+            font-family: 'Comfortaa', sans-serif;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+            background: #3d5a2b;
+            border: 2px solid #4a7043;
+            border-radius: 5px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="camouflage"></div>
+    <div id="notification-container"></div>
+    <div class="sidebar">
+        <div class="floating-title">Voin-Clicker <span class="weapon-icon">⚔️</span></div>
+        <div class="tabs">
+            <button class="tab-button active" data-tab="clicker">Кликкер</button>
+            <button class="tab-button" data-tab="upgrades">Улучшения</button>
+            <button class="tab-button" data-tab="bonus">Бонусы</button>
+            <button class="tab-button" data-tab="brigades">Бригады</button>
+            <button class="tab-button" data-tab="inventory">Инвентарь</button>
+            <button class="tab-button" data-tab="casino">Казино</button>
+            <button class="tab-button" data-tab="converter">Конвертер</button>
+            <button class="tab-button" data-tab="promo">Промокод</button>
+            <button class="tab-button" data-tab="fleaMarket">Блошиный рынок</button>
+        </div>
+    </div>
+    <div class="score-panel">
+        <span class="currency-value uah" id="uah">₴0</span> | 
+        <span class="currency-value usd" id="usd">$0</span> | 
+        <span class="currency-value eur" id="eur">€0</span> | 
+        <span class="currency-value btc" id="btc">₿0</span>
+    </div>
+    <div class="tab-container">
+        <div class="tab-content" id="clicker">
+            <div class="clicker-container">
+                <div class="coin" id="coin" role="button" aria-label="Нажать для начисления гривен"></div>
+                <div class="click-progress-bar">
+                    <div class="click-progress-fill" id="clickProgressFill"></div>
+                </div>
+                <p id="clickProgressText">0 / 100 кликов</p>
+            </div>
+        </div>
+        <div class="tab-content" id="upgrades" style="display: none;">
+            <div class="upgrade" data-upgrade="upgrade1">
+                <p>Двойной клик: 2 ₴/клик</p>
+                <p>Стоимость: 150 ₴</p>
+                <button>Купить</button>
+            </div>
+            <div class="upgrade" data-upgrade="upgrade2">
+                <p>Тройной клик: 3 ₴/клик</p>
+                <p>Стоимость: 350 ₴</p>
+                <button>Купить</button>
+            </div>
+            <div class="upgrade" data-upgrade="upgrade3">
+                <p>Мега-клик: 5 ₴/клик</p>
+                <p>Стоимость: 1000 ₴</p>
+                <button>Купить</button>
+            </div>
+            <div class="upgrade" data-upgrade="liveMiner">
+                <p>Live майнер: +1800 ₴/мин</p>
+                <p>Стоимость: 9000 ₴</p>
+                <button>Купить</button>
+            </div>
+            <div class="upgrade" id="minerIncome">
+                <p>Доход Live майнера: <span id="minerIncomeAmount">0</span> ₴</p>
+                <button id="claimMinerIncome">Забрать</button>
+            </div>
+        </div>
+        <div class="tab-content" id="bonus" style="display: none;">
+            <div class="upgrade">
+                <p>150 ₴ каждую минуту</p>
+                <div id="minuteBonusContainer">
+                    <button id="bonusButton">Получить</button>
+                    <span id="minuteBonusTimer" class="bonus-timer" style="display: none;">Осталось: 00:00</span>
+                </div>
+            </div>
+            <div class="upgrade">
+                <p>1 $ каждый час</p>
+                <button id="hourlyBonusButton">Получить</button>
+                <span id="hourlyBonusTimer" class="bonus-timer" style="display: none;">Осталось: 00:00</span>
+            </div>
+            <div class="upgrade">
+                <p>1 ₿ каждые 24 часа</p>
+                <button id="dailyBonusButton">Получить</button>
+                <span id="dailyBonusTimer" class="bonus-timer" style="display: none;">Осталось: 00:00</span>
+            </div>
+        </div>
+        <div class="tab-content" id="brigades" style="display: none;">
+            <div id="brigades-list"></div>
+        </div>
+        <div class="tab-content" id="inventory" style="display: none;">
+            <div class="inventory-tabs">
+                <button class="inventory-tab-button active" data-subtab="brigades-inventory">Бригады</button>
+                <button class="inventory-tab-button" data-subtab="vehicles-inventory">Транспорт</button>
+                <button class="inventory-tab-button" data-subtab="equipment-inventory">Экипировка</button>
+                <button class="inventory-tab-button" data-subtab="callsigns-inventory">Позывные</button>
+            </div>
+            <div id="inventory-list" class="inventory-scroll">
+                <div id="brigades-inventory" class="inventory-subtab active"></div>
+                <div id="vehicles-inventory" class="inventory-subtab">
+                    <p class="inventory-placeholder">Скоро в наличии!</p>
+                </div>
+                <div id="equipment-inventory" class="inventory-subtab">
+                    <p class="inventory-placeholder">Скоро в наличии!</p>
+                </div>
+                <div id="callsigns-inventory" class="inventory-subtab">
+                    <p class="inventory-placeholder">Скоро в наличии!</p>
+                </div>
+            </div>
+        </div>
+        <div class="tab-content" id="casino" style="display: none;">
+            <div class="casino-container centered-content">
+                <h2>ULTRA DEPOSIT</h2>
+                <div class="casino-modes">
+                    <button class="mode-button active" data-mode="standard">Стандарт</button>
+                    <button class="mode-button" data-mode="highRisk">Высокий риск</button>
+                    <button class="mode-button" data-mode="lucky">Удача</button>
+                </div>
+                <p>Ставка (₴): <input type="number" id="betAmount" min="10" max="10000" value="10"></p>
+                <button id="placeBet" class="bet-button">Сделать ставку</button>
+                <p id="casinoResult"></p>
+                <div class="casino-image">
+                    <img src="https://sport24.by/public/images/20220906144213_original_26.webp" alt="Casino Promo">
+                </div>
+            </div>
+        </div>
+        <div class="tab-content" id="converter" style="display: none;">
+            <div class="converter-container centered-content">
+                <p>Сумма: <span id="convertAmountDisplay">0</span></p>
+                <input type="number" id="convertAmount" min="1" placeholder="Введите сумму">
+                <select id="fromCurrency">
+                    <option value="uah">₴</option>
+                    <option value="usd">$</option>
+                    <option value="eur">€</option>
+                    <option value="btc">₿</option>
+                </select>
+                <span>→</span>
+                <select id="toCurrency">
+                    <option value="usd">$</option>
+                    <option value="eur">€</option>
+                    <option value="btc">₿</option>
+                    <option value="uah">₴</option>
+                </select>
+                <button id="convertButton" class="convert-button">Конвертировать</button>
+                <div class="progress-bar" id="convertProgress">
+                    <div class="progress-fill" id="convertProgressFill"></div>
+                </div>
+                <p id="convertResult"></p>
+            </div>
+        </div>
+        <div class="tab-content" id="promo" style="display: none;">
+            <div class="promo-container centered-content">
+                <h2>АКТИВАЦИЯ ПРОМОКОДА</h2>
+                <input type="text" id="promoInput" placeholder="Введите промокод">
+                <button id="redeemPromo" class="redeem-button">Активировать</button>
+                <p id="promoResult"></p>
+                <div id="promoHistory" class="promo-history"></div>
+            </div>
+        </div>
+        <div class="tab-content" id="fleaMarket" style="display: none;">
+            <div class="flea-market-container centered-content">
+                <h2>БЛОШИНЫЙ РЫНОК</h2>
+                <p id="fleaMarketTimer"></p>
+                <div id="fleaMarketItems" class="flea-market-items"></div>
+                <div id="minerIncomePanel" style="display: none;">
+    <p>Доход Live Miner: <span id="minerIncomeAmount">0</span> ₴</p>
+    <button id="claimMinerIncome">Собрать доход</button>
+</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение скриптов -->
+    <script src="game.js"></script>
+    <script src="brigades.js"></script>
+    <script>
+        // Минимальный скрипт для переключения вкладок
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            const tab = document.getElementById(id);
+            if (tab) tab.style.display = 'block';
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            const activeButton = document.querySelector(`[data-tab="${id}"]`);
+            if (activeButton) activeButton.classList.add('active');
+        }
+
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.addEventListener('click', () => showTab(btn.dataset.tab));
+        });
+
+        // Инициализация
+        showTab('clicker');
+
+        // Обработка ошибок загрузки изображений
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.chevron-preview').forEach(preview => {
+                const img = new Image();
+                img.src = preview.style.backgroundImage.slice(5, -2);
+                img.onerror = () => {
+                    preview.style.backgroundImage = 'none';
+                    preview.style.backgroundColor = '#ccc';
+                    preview.textContent = 'Изображение недоступно';
+                    preview.style.display = 'flex';
+                    preview.style.alignItems = 'center';
+                    preview.style.justifyContent = 'center';
+                    preview.style.color = '#000';
+                    preview.style.fontSize = '12px';
+                    preview.style.textAlign = 'center';
+                };
+            });
+        });
+    </script>
+</body>
