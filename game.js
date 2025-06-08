@@ -24,13 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
     usd: parseInt(localStorage.getItem('usd')) || 0,
     eur: parseInt(localStorage.getItem('eur')) || 0,
     btc: parseInt(localStorage.getItem('btc')) || 0,
-    clickValue: parseInt(localStorage.getItem('clickValue')) || 1,
+    clickValue: JSON.parse(localStorage.getItem('clickValue')) || { uah: 1 },
     minuteBonus: parseInt(localStorage.getItem('minuteBonus')) || 0,
     hourlyBonus: parseInt(localStorage.getItem('hourlyBonus')) || 0,
     dailyBonus: parseInt(localStorage.getItem('dailyBonus')) || 0,
     casinoMode: localStorage.getItem('casinoMode') || 'standard',
-    liveMinerBought: localStorage.getItem('liveMiner') === 'true',
-    minerIncome: parseFloat(localStorage.getItem('minerIncome')) || 0,
+    farmaBought: localStorage.getItem('farma') === 'true',
+    farmaIncome: parseFloat(localStorage.getItem('farmaIncome')) || 0,
     promoHistory: JSON.parse(localStorage.getItem('promoHistory')) || [],
     fleaMarketCooldown: parseInt(localStorage.getItem('fleaMarketCooldown')) || 0,
     fleaMarketPurchase: localStorage.getItem('fleaMarketPurchase') === 'true',
@@ -46,13 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
       usd: 0,
       eur: 0,
       btc: 0,
-      clickValue: 1,
+      clickValue: { uah: 1 },
       minuteBonus: 0,
       hourlyBonus: 0,
       dailyBonus: 0,
       casinoMode: 'standard',
-      liveMinerBought: false,
-      minerIncome: 0,
+      farmaBought: false,
+      farmaIncome: 0,
       promoHistory: [],
       fleaMarketCooldown: 0,
       fleaMarketPurchase: false,
@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem(`chevron_${c.id}`, 'false');
       });
     }
-    ['upgrade1', 'upgrade2', 'upgrade3', 'upgrade4', 'upgrade5', 'upgrade6', 'liveMiner'].forEach(function (key) {
+    ['subscription_vplus', 'subscription_bronze', 'subscription_silver', 'subscription_gold', 'subscription_platinum', 'subscription_vip', 'farma'].forEach(function (key) {
       localStorage.setItem(key, 'false');
     });
     localStorage.setItem('promoHistory', JSON.stringify([]));
@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('fleaMarketItems', JSON.stringify([]));
     localStorage.setItem('clickStreak', '0');
     localStorage.setItem('lastClickTime', '0');
+    localStorage.setItem('clickValue', JSON.stringify({ uah: 1 }));
   }
   const els = {
     uah: document.getElementById('uah'),
@@ -110,23 +111,23 @@ document.addEventListener('DOMContentLoaded', function () {
     promoHistory: document.getElementById('promoHistory'),
     fleaMarketTimer: document.getElementById('fleaMarketTimer'),
     fleaMarketItems: document.getElementById('fleaMarketItems'),
-    minerIncomeAmount: document.getElementById('minerIncomeAmount'),
-    claimMinerIncome: document.getElementById('claimMinerIncome'),
+    farmaIncomeAmount: document.getElementById('farmaIncomeAmount'),
+    claimFarmaIncome: document.getElementById('claimFarmaIncome'),
     clickProgressFill: document.getElementById('clickProgressFill'),
     clickProgressText: document.getElementById('clickProgressText'),
     brigadesList: document.getElementById('brigades-list'),
-    minerIncomePanel: document.getElementById('minerIncomePanel'),
+    farmaIncomePanel: document.getElementById('farmaIncomePanel'),
     playersList: document.getElementById('players-list'),
     playerChevrons: document.getElementById('player-chevrons')
   };
-  const upgrades = [
-    { id: 'upgrade1', name: 'Двойной клик', cost: 150, value: 2, currency: 'uah', bought: localStorage.getItem('upgrade1') === 'true' },
-    { id: 'upgrade2', name: 'Тройной клик', cost: 350, value: 3, currency: 'uah', bought: localStorage.getItem('upgrade2') === 'true' },
-    { id: 'upgrade3', name: 'Мегаклик', cost: 1000, value: 5, currency: 'uah', bought: localStorage.getItem('upgrade3') === 'true' },
-    { id: 'upgrade4', name: 'Титанический Удар', cost: 20000, value: 10, currency: 'uah', bought: localStorage.getItem('upgrade4') === 'true' },
-    { id: 'upgrade5', name: 'Молниеносный Удар', cost: 50000, value: 20, currency: 'uah', bought: localStorage.getItem('upgrade5') === 'true' },
-    { id: 'upgrade6', name: 'Ядерный Клик', cost: 3, value: 50, currency: 'btc', bought: localStorage.getItem('upgrade6') === 'true' },
-    { id: 'liveMiner', name: 'Live майнер', cost: 9000, value: 40, currency: 'uah', bought: localStorage.getItem('liveMiner') === 'true' }
+  const subscriptions = [
+    { id: 'subscription_vplus', name: 'Подписка V+', cost: 20000, value: { uah: 5 }, currency: 'uah', class: 'subscription-vplus', bought: localStorage.getItem('subscription_vplus') === 'true' },
+    { id: 'subscription_bronze', name: 'Подписка Bronze', cost: 50000, value: { uah: 10 }, currency: 'uah', class: 'subscription-bronze', bought: localStorage.getItem('subscription_bronze') === 'true' },
+    { id: 'subscription_silver', name: 'Подписка Silver', cost: 75000, value: { uah: 20 }, currency: 'uah', class: 'subscription-silver', bought: localStorage.getItem('subscription_silver') === 'true' },
+    { id: 'subscription_gold', name: 'Подписка Gold', cost: 150000, value: { uah: 50 }, currency: 'uah', class: 'subscription-gold', bought: localStorage.getItem('subscription_gold') === 'true' },
+    { id: 'subscription_platinum', name: 'Подписка Platinum', cost: 250000, value: { usd: 1 }, currency: 'uah', class: 'subscription-platinum', bought: localStorage.getItem('subscription_platinum') === 'true' },
+    { id: 'subscription_vip', name: 'Подписка VIP', cost: 25, value: { eur: 1 }, currency: 'btc', class: 'subscription-vip', bought: localStorage.getItem('subscription_vip') === 'true' },
+    { id: 'farma', name: 'Farma', cost: 50, value: 30, currency: 'btc', class: 'subscription-farma', bought: localStorage.getItem('farma') === 'true' }
   ];
   const rareChevrons = ['chevron10', 'chevron19', 'chevron20'];
   const fakePlayers = [
@@ -154,86 +155,81 @@ document.addEventListener('DOMContentLoaded', function () {
     showNotification(`Недостаточно ${currency.toUpperCase()} для покупки "${chevron.name}"!`);
     return false;
   };
-  function renderUpgrades() {
-    const upgradesList = document.getElementById('upgrades');
-    if (!upgradesList) {
+  function renderSubscriptions() {
+    const subscriptionsList = document.getElementById('subscriptions');
+    if (!subscriptionsList) {
       return;
     }
-    upgradesList.innerHTML = '';
-    upgrades.forEach(function (u) {
-      if (u.value <= state.clickValue && u.id !== 'liveMiner') {
-        return;
-      }
+    subscriptionsList.innerHTML = '';
+    subscriptions.forEach(function (s) {
       const div = document.createElement('div');
-      div.className = 'upgrade';
-      div.dataset.upgrade = u.id;
-      const currencySymbol = { uah: '₴', usd: '$', eur: '€', btc: '₿' }[u.currency];
+      div.className = `upgrade-block ${s.class}`;
+      div.id = s.id;
+      const statusId = `status-${s.id.replace('subscription_', '')}`;
+      const buttonId = s.id === 'farma' ? 'buyFarma' : `buy${s.name.replace('Подписка ', '')}`;
+      let statusText = s.bought ? 'Куплено' : '';
+      let statusColor = s.bought ? '#b7ffb7' : '';
       div.innerHTML = `
-        <p>${u.name}: ${u.id === 'liveMiner' ? `+40 ₴/сек` : `${u.value} ₴/клик`}</p>
-        <p>Стоимость: ${formatNumber(u.cost)} ${currencySymbol}</p>
-        <button ${u.bought ? 'disabled' : ''}>${u.bought ? 'Куплено' : 'Купить'}</button>
+        <div class="upgrade-title">${s.name}</div>
+        <div class="upgrade-desc">${s.id === 'farma' ? '+1800 ₴/мин' : Object.keys(s.value).map(c => `+${s.value[c]} ${c === 'uah' ? '₴' : c === 'usd' ? '$' : '€'} за 1 клик`).join('')}</div>
+        <div class="upgrade-cost">Стоимость: ${formatNumber(s.cost)} ${s.currency === 'uah' ? '₴' : '₿'}</div>
+        <div class="upgrade-status" id="${statusId}" style="color: ${statusColor}">${statusText}</div>
+        <button id="${buttonId}" ${s.bought ? 'disabled' : ''}>Купить</button>
       `;
-      div.querySelector('button').addEventListener('click', function () {
-        if (!u.bought && state[u.currency] >= u.cost) {
-          state[u.currency] -= u.cost;
-          if (u.id === 'liveMiner') {
-            state.liveMinerBought = true;
-            localStorage.setItem('liveMiner', 'true');
-            if (els.minerIncomePanel) {
-              els.minerIncomePanel.style.display = 'block';
-            }
-          } else {
-            state.clickValue = u.value;
-            localStorage.setItem('clickValue', state.clickValue);
-          }
-          u.bought = true;
-          localStorage.setItem(u.id, 'true');
-          localStorage.setItem(u.currency, state[u.currency]);
-          showNotification(`Улучшение "${u.name}" куплено!`);
-          updateDisplay();
-        } else {
-          showNotification(`Недостаточно ${u.currency.toUpperCase()} для покупки улучшения!`);
+      const button = div.querySelector('button');
+      button.addEventListener('click', function () {
+        if (s.bought) return;
+        if (state[s.currency] < s.cost) {
+          showNotification(`Недостаточно ${s.currency.toUpperCase()} для покупки!`);
+          return;
         }
-      });
-      upgradesList.appendChild(div);
-      // Вставляем доход от майнера сразу после покупки liveMiner
-      if (u.id === 'liveMiner') {
-        const minerIncomePanel = document.createElement('div');
-        minerIncomePanel.id = 'minerIncomePanel';
-        minerIncomePanel.style.marginTop = '15px';
-        minerIncomePanel.style.display = state.liveMinerBought ? 'block' : 'none';
-        minerIncomePanel.innerHTML = `
-          <div class="upgrade" id="minerIncome" style="margin-top:0;">
-            <p>Доход Live майнера: <span id="minerIncomeAmount">${formatNumber(state.minerIncome.toFixed(2))}</span> ₴</p>
-            <button id="claimMinerIncome" ${!state.liveMinerBought ? 'disabled' : ''}>Забрать</button>
-          </div>
-        `;
-        upgradesList.appendChild(minerIncomePanel);
-        // Обработчик кнопки сбора дохода
-        setTimeout(() => {
-          const claimBtn = document.getElementById('claimMinerIncome');
-          if (claimBtn) {
-            claimBtn.onclick = function () {
-              if (!state.liveMinerBought) {
-                showNotification('Купите Live майнер!');
-                return;
-              }
-              if (state.minerIncome >= 1) {
-                const income = Math.floor(state.minerIncome);
-                state.uah += income;
-                state.minerIncome = 0;
-                localStorage.setItem('uah', state.uah);
-                localStorage.setItem('minerIncome', state.minerIncome);
-                showNotification(`Собрано: ${income} ₴!`);
-              } else {
-                showNotification('Нет дохода для сбора!');
-              }
-              updateDisplay();
-            };
+        state[s.currency] -= s.cost;
+        localStorage.setItem(s.currency, state[s.currency]);
+        if (s.id === 'farma') {
+          state.farmaBought = true;
+          localStorage.setItem('farma', 'true');
+          if (els.farmaIncomePanel) {
+            els.farmaIncomePanel.style.display = 'block';
           }
-        }, 0);
-      }
+        } else {
+          localStorage.setItem(s.id, 'true');
+          s.bought = true;
+          updateClickValue();
+        }
+        showNotification(`Подписка "${s.name}" куплена!`);
+        updateDisplay();
+      });
+      subscriptionsList.appendChild(div);
     });
+    const farmaIncomePanel = document.createElement('div');
+    farmaIncomePanel.className = 'upgrade-block subscription-farma';
+    farmaIncomePanel.id = 'farmaIncomeBlock';
+    farmaIncomePanel.innerHTML = `
+      <div class="upgrade-title">Доход Farma</div>
+      <div class="upgrade-desc"><span id="farmaIncomeAmount">${formatNumber(state.farmaIncome.toFixed(0))}</span> ₴</div>
+      <button id="claimFarmaIncome" ${!state.farmaBought ? 'disabled' : ''}>Забрать</button>
+    `;
+    subscriptionsList.appendChild(farmaIncomePanel);
+    const claimBtn = document.getElementById('claimFarmaIncome');
+    if (claimBtn) {
+      claimBtn.onclick = function () {
+        if (!state.farmaBought) {
+          showNotification('Купите Farma!');
+          return;
+        }
+        if (state.farmaIncome >= 1) {
+          const income = Math.floor(state.farmaIncome);
+          state.uah += income;
+          state.farmaIncome = 0;
+          localStorage.setItem('uah', state.uah);
+          localStorage.setItem('farmaIncome', state.farmaIncome);
+          showNotification(`Собрано: ${income} ₴!`);
+        } else {
+          showNotification('Нет дохода для сбора!');
+        }
+        updateDisplay();
+      };
+    }
   }
   function renderBrigades() {
     if (!els.brigadesList) {
@@ -291,6 +287,24 @@ document.addEventListener('DOMContentLoaded', function () {
       els.playersList.appendChild(div);
     });
   }
+  function updateClickValue() {
+    let clickValue = { uah: 1 };
+    if (localStorage.getItem('subscription_vip') === 'true') {
+      clickValue = { eur: 1 };
+    } else if (localStorage.getItem('subscription_platinum') === 'true') {
+      clickValue = { usd: 1 };
+    } else if (localStorage.getItem('subscription_gold') === 'true') {
+      clickValue = { uah: 50 };
+    } else if (localStorage.getItem('subscription_silver') === 'true') {
+      clickValue = { uah: 20 };
+    } else if (localStorage.getItem('subscription_bronze') === 'true') {
+      clickValue = { uah: 10 };
+    } else if (localStorage.getItem('subscription_vplus') === 'true') {
+      clickValue = { uah: 5 };
+    }
+    state.clickValue = clickValue;
+    localStorage.setItem('clickValue', JSON.stringify(clickValue));
+  }
   function updateDisplay() {
     if (els.uah) {
       els.uah.textContent = `₴${formatNumber(state.uah)}`;
@@ -304,8 +318,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (els.btc) {
       els.btc.textContent = `₿${formatNumber(state.btc)}`;
     }
-    if (els.minerIncomeAmount) {
-      els.minerIncomeAmount.textContent = formatNumber(state.minerIncome.toFixed(2));
+    if (els.farmaIncomeAmount) {
+      els.farmaIncomeAmount.textContent = formatNumber(state.farmaIncome.toFixed(0));
     }
     if (els.convertAmountDisplay && els.convertAmount) {
       els.convertAmountDisplay.textContent = formatNumber(els.convertAmount.value || 0);
@@ -320,9 +334,9 @@ document.addEventListener('DOMContentLoaded', function () {
     localStorage.setItem('usd', state.usd);
     localStorage.setItem('eur', state.eur);
     localStorage.setItem('btc', state.btc);
-    localStorage.setItem('clickValue', state.clickValue);
-    localStorage.setItem('liveMiner', state.liveMinerBought);
-    localStorage.setItem('minerIncome', state.minerIncome);
+    localStorage.setItem('clickValue', JSON.stringify(state.clickValue));
+    localStorage.setItem('farma', state.farmaBought);
+    localStorage.setItem('farmaIncome', state.farmaIncome);
     localStorage.setItem('promoHistory', JSON.stringify(state.promoHistory));
     localStorage.setItem('fleaMarketCooldown', state.fleaMarketCooldown);
     localStorage.setItem('fleaMarketPurchase', state.fleaMarketPurchase);
@@ -336,15 +350,28 @@ document.addEventListener('DOMContentLoaded', function () {
     updatePromoHistory();
     updateFleaMarket();
     renderBrigades();
-    renderUpgrades();
+    renderSubscriptions();
     renderOnlinePlayers();
   }
   function updateButtons() {
-    upgrades.forEach(function (u) {
-      const btn = document.querySelector(`[data-upgrade="${u.id}"] button`);
+    subscriptions.forEach(function (s) {
+      const btn = document.getElementById(s.id === 'farma' ? 'buyFarma' : `buy${s.name.replace('Подписка ', '')}`);
       if (btn) {
-        btn.disabled = u.bought || state[u.currency] < u.cost || (u.value <= state.clickValue && u.id !== 'liveMiner');
-        btn.textContent = u.bought ? 'Куплено' : 'Купить';
+        btn.disabled = s.bought || (s.cost > 0 && state[s.currency] < s.cost);
+        btn.textContent = s.bought ? 'Куплено' : 'Купить';
+        const statusEl = document.getElementById(`status-${s.id.replace('subscription_', '')}`);
+        if (statusEl) {
+          if (s.bought) {
+            statusEl.textContent = 'Куплено';
+            statusEl.style.color = '#b7ffb7';
+          } else if (s.cost > 0 && state[s.currency] < s.cost) {
+            statusEl.textContent = `Недостаточно ${s.currency.toUpperCase()}`;
+            statusEl.style.color = '#ff6666';
+          } else {
+            statusEl.textContent = 'Доступно';
+            statusEl.style.color = '#ffffff';
+          }
+        }
       }
     });
     if (window.chevrons) {
@@ -415,14 +442,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (id === 'brigades') {
       renderBrigades();
-    }
-    if (id === 'inventory') {
+    } else if (id === 'inventory') {
       showInventorySubtab('brigades-inventory');
-    }
-    if (id === 'upgrades') {
-      renderUpgrades();
-    }
-    if (id === 'players') {
+    } else if (id === 'subscriptions') {
+      renderSubscriptions();
+    } else if (id === 'players') {
       renderOnlinePlayers();
     }
   }
@@ -608,7 +632,16 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('clickStreak', state.clickStreak);
         showNotification('Бонус за 100 кликов: 1000 ₴!');
       }
-      state.uah += state.clickValue;
+      if (state.clickValue.uah) {
+        state.uah += state.clickValue.uah;
+      } else if (state.clickValue.usd) {
+        state.usd += state.clickValue.usd;
+      } else if (state.clickValue.eur) {
+        state.eur += state.clickValue.eur;
+      }
+      localStorage.setItem('uah', state.uah);
+      localStorage.setItem('usd', state.usd);
+      localStorage.setItem('eur', state.eur);
       updateDisplay();
     });
   }
@@ -629,7 +662,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (state.hourlyBonus <= 0) {
         state.eur += 5;
         state.hourlyBonus = 3600;
-        showNotification(`Бонус получен: 5 €!`);
+        showNotification(`Бонус: 5 €!`);
         localStorage.setItem('eur', state.eur);
         localStorage.setItem('hourlyBonus', state.hourlyBonus);
         updateDisplay();
@@ -641,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (state.dailyBonus <= 0) {
         state.btc += 1;
         state.dailyBonus = 86400;
-        showNotification(`Бонус получен: 1 ₿!`);
+        showNotification(`Бонус: 1 ₿!`);
         localStorage.setItem('btc', state.btc);
         localStorage.setItem('dailyBonus', state.dailyBonus);
         updateDisplay();
@@ -720,7 +753,7 @@ document.addEventListener('DOMContentLoaded', function () {
               els.casinoResult.classList.add('win');
             }
           } else {
-            showNotification('Проигрыш! Попробуйте снова!');
+            showNotification('Проигрыш! Попробуйте еще! ');
             if (els.casinoResult) {
               els.casinoResult.textContent = 'ПРОИГРЫШ!';
               els.casinoResult.classList.add('error');
@@ -755,23 +788,20 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!from || !to || isNaN(amount) || amount < minAmounts[from] || from === to) {
         showNotification(from === to ? 'Выберите разные валюты!' : `Минимальная сумма: ${minAmounts[from]} ${from.toUpperCase()}!`);
         if (els.convertResult) {
-          els.convertResult.textContent = from === to ? 'Выберите разные валюты!' : `Минимальная сумма: ${minAmounts[from]} ${from.toUpperCase()}!`;
+          els.convertResult.textContent = from === to ? 'Выберите разные валюты!' : `Минимальная сумма: ${minAmounts[from]} ${from}!`;
         }
         return;
       }
-      const rates = { uah_usd: 1 / 2000, uah_eur: 1 / 5000, uah_btc: 1 / 100000, usd_uah: 2000, usd_eur: 0.4, usd_btc: 0.02, eur_uah: 5000, eur_usd: 2.5, eur_btc: 0.05, btc_uah: 100000, btc_usd: 50, btc_eur: 20 };
+      const rates = { uah_usd: 1 / 2000, uah_eur: 1 / 14000, uah_btc: 1 / 100000, usd_uah: 2000, usd_eur: 0.4, usd_btc: 0.02, eur_uah: 14000, eur_usd: 2.5, eur_btc: 0.05, btc_uah: 100000, btc_usd: 50, btc_eur: 20 };
       const key = `${from}_${to}`;
       if (!rates[key]) {
         showNotification(`Обмен ${from.toUpperCase()} → ${to.toUpperCase()} недоступен!`);
-        if (els.convertResult) {
-          els.convertResult.textContent = `Обмен ${from.toUpperCase()} → ${to.toUpperCase()} недоступен!`;
-        }
         return;
       }
       if (state[from] < amount) {
         showNotification(`Недостаточно средств!`);
         if (els.convertResult) {
-          els.convertResult.textContent = `Недостаточно средств!`;
+          els.convertResult.textContent = 'Недостаточно!';
         }
         return;
       }
@@ -797,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function () {
           localStorage.setItem(to, state[to]);
           showNotification(`Конвертировано: ${amount} ${from.toUpperCase()} → ${converted} ${to.toUpperCase()}!`);
           if (els.convertResult) {
-            els.convertResult.textContent = `Конвертировано: ${amount} ${from.toUpperCase()} → ${converted} ${to.toUpperCase()}!`;
+            els.convertResult.textContent = `Конвертация: ${amount} ${from.toUpperCase()} → ${converted} ${to.toUpperCase()}`;
           }
           if (els.convertProgress) {
             els.convertProgress.style.display = 'none';
@@ -818,14 +848,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const promo = els.promo?.value?.toLowerCase().trim();
       const promos = {
         'tester5': {
-          reward: '3 ₿ и шеврон "15 ОГШБ"',
+          reward: '3 ₿ и шеврон "15"',
           action: function () {
             state.btc += 3;
-            // Добавить шеврон 15 ОГШБ в инвентарь
             if (window.chevrons) {
               const chevron = window.chevrons.find(c => c.id === 'chevron15');
               if (chevron) {
-                localStorage.setItem('chevron_chevron144', 'true');
+                localStorage.setItem('chevron_15', 'true');
               }
             }
           }
@@ -834,10 +863,10 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!promo || !promos[promo] || localStorage.getItem(`promo_${promo}`) === 'true') {
         showNotification('Недействительный или уже использованный промокод!');
         if (els.promoResult) {
-          els.promoResult.textContent = 'Недействительный или уже использованный промокод!';
+          els.promoResult.textContent = 'Недействительный или использованный промокод!';
           els.promoResult.classList.add('error');
         }
-        setTimeout(function () {
+        setTimeout(() => {
           if (els.promoResult) {
             els.promoResult.textContent = '';
             els.promoResult.classList.remove('error');
@@ -848,7 +877,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 1000);
         return;
       }
-      // Активируем промокод
       promos[promo].action();
       localStorage.setItem(`promo_${promo}`, 'true');
       state.promoHistory.push({ code: promo, reward: promos[promo].reward });
@@ -875,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.querySelectorAll('.chevron-preview').forEach(function (preview) {
     const img = new Image();
-    const src = preview.style.backgroundImage?.slice(5, -2);
+    const src = preview.style.backgroundImage?.slice(1, -2);
     if (src) {
       img.src = src;
       img.onerror = function () {
@@ -896,9 +924,9 @@ document.addEventListener('DOMContentLoaded', function () {
     isTabActive = !document.hidden;
   });
   setInterval(function () {
-    if (isTabActive && state.liveMinerBought) {
-      state.minerIncome += 30;
-      localStorage.setItem('minerIncome', state.minerIncome);
+    if (isTabActive && state.farmaBought) {
+      state.farmaIncome += 30; // 30 UAH per second
+      localStorage.setItem('farmaIncome', state.farmaIncome);
     }
     if (state.minuteBonus > 0) {
       state.minuteBonus--;
